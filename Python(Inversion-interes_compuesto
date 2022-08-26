@@ -1,0 +1,91 @@
+def min(a,b):
+    if a<=b:
+        return a
+    else: 
+        return b
+def BuildPrint(cartel,ar):
+    arr = []
+    for number in ar:
+        arr.append(round(number,2))
+        
+    pos = 0
+    ans = ""
+    for number in arr:
+        s = str(number)
+        ans += s
+        for i in range(pos,len(cartel)):
+            pos = i
+            if cartel[i]=='|':
+                ans += '|'
+                break
+            if i>=len(ans):
+                ans += " "
+            
+        pos += 1
+    return ans
+
+
+inversion_inicial = float(input('Inversion inicial:'))
+cant_dias = int(input('Cantidad de dias desde la primera inversion:'))
+inversiones = [(inversion_inicial,0)]
+in_bot = 0
+in_wallet = 0
+to_invertir = 0
+totalRoi = 0
+
+my_file = open("Datos.txt",'w')
+cartel = 'Dia|Inversion Activa|Total Ganado|My wallet|Wallet BOT|Wallet de Reinvertir|'
+my_file.write(cartel)
+my_file.write("\n")
+
+for day in range(0,cant_dias):
+    if day%7==0:
+         continue
+    
+    interest = 0
+    inversiones_activas = []
+
+    for (inversion,recuperado) in inversiones:
+        if recuperado<inversion*3:
+            inversiones_activas.append((inversion,recuperado))
+
+    inversiones = inversiones_activas
+    inversion_activa = 0
+    payment_total = 0
+    inversiones_activas = []
+
+    
+    for (inversion,recuperado) in inversiones:
+        inversion_activa += inversion
+        lim = inversion*3 - recuperado
+        this_payment = min((1.5 * inversion)/100 , lim) 
+        payment_total += this_payment
+        inversiones_activas.append((inversion,recuperado+this_payment))
+    
+    inversiones = inversiones_activas
+
+    in_bot += payment_total
+    totalRoi += payment_total
+    
+
+    if in_bot > inversion_activa/10:
+        
+        to_invertir += in_bot/2
+        in_wallet += in_bot - in_bot/2
+        
+
+        in_bot = 0
+    
+    ar = [day,inversion_activa,totalRoi,in_wallet,in_bot,to_invertir]
+    
+    my_file.write(BuildPrint(cartel,ar))
+    my_file.write("\n")
+
+
+    if to_invertir >= 30:
+        inversiones.append((to_invertir,0))
+        to_invertir = 0
+    
+    
+
+my_file.close()    
